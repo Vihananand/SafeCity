@@ -3,12 +3,18 @@ package com.example.safecity.ui.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -16,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.safecity.R
+import com.example.safecity.ui.theme.*
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,84 +43,122 @@ fun MainScreen(
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet {
+            ModalDrawerSheet(
+                drawerContainerColor = MaterialTheme.colorScheme.surface,
+                drawerShape = RoundedCornerShape(topEnd = 32.dp, bottomEnd = 32.dp),
+                modifier = Modifier.width(320.dp)
+            ) {
                 DrawerHeader()
                 Spacer(modifier = Modifier.height(16.dp))
+
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.Dashboard, contentDescription = null) },
-                    label = { Text("Dashboard") },
+                    label = { Text("Dashboard", fontWeight = FontWeight.Bold) },
                     selected = currentRoute == "dashboard",
                     onClick = {
                         scope.launch { drawerState.close() }
                         navController.navigate("dashboard") {
                             popUpTo("dashboard") { inclusive = true }
                         }
-                    }
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = NavigationDrawerItemDefaults.colors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary
+                    )
                 )
-                NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.NotificationsActive, contentDescription = null) },
-                    label = { Text("Safety Alerts") },
-                    selected = currentRoute == "alerts",
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        onNavigateToAlerts()
-                    }
+
+                DrawerItem(Icons.Default.NotificationsActive, "Safety Alerts", currentRoute == "alerts") {
+                    scope.launch { drawerState.close() }
+                    onNavigateToAlerts()
+                }
+
+                DrawerItem(Icons.Default.HomeWork, "Saved Places", currentRoute == "saved_places") {
+                    scope.launch { drawerState.close() }
+                    onNavigateToSavedPlaces()
+                }
+
+                // Fixed: HorizontalDivider doesn't have alpha parameter
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
                 )
-                NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.HomeWork, contentDescription = null) },
-                    label = { Text("Saved Places") },
-                    selected = currentRoute == "saved_places",
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        onNavigateToSavedPlaces()
-                    }
-                )
-                NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.Settings, contentDescription = null) },
-                    label = { Text("Settings") },
-                    selected = currentRoute == "settings",
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        onNavigateToSettings()
-                    }
-                )
-                NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.Info, contentDescription = null) },
-                    label = { Text("About") },
-                    selected = currentRoute == "about",
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        onNavigateToAbout()
-                    }
-                )
+
+                DrawerItem(Icons.Default.Settings, "Settings", currentRoute == "settings") {
+                    scope.launch { drawerState.close() }
+                    onNavigateToSettings()
+                }
+
+                DrawerItem(Icons.Default.Info, "About", currentRoute == "about") {
+                    scope.launch { drawerState.close() }
+                    onNavigateToAbout()
+                }
             }
         }
     ) {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { 
+                    title = {
                         Text(
-                            when (currentRoute) {
-                                "dashboard" -> "SafeCity Dashboard"
+                            text = when (currentRoute) {
+                                "dashboard" -> "SafeCity Home"
                                 "settings" -> "Settings"
-                                "about" -> "About SafeCity"
-                                "saved_places" -> "Saved Places"
-                                "alerts" -> "Safety Alerts"
+                                "about" -> "About Us"
+                                "saved_places" -> "Safe Places"
+                                "alerts" -> "Live Alerts"
                                 else -> "SafeCity"
-                            }
+                            },
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     },
                     navigationIcon = {
-                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu")
+                        IconButton(
+                            onClick = { scope.launch { drawerState.open() } },
+                            modifier = Modifier
+                                .background(
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                                    CircleShape
+                                )
+                                .padding(4.dp)
+                        ) {
+                            Icon(Icons.Default.Menu, contentDescription = "Menu", tint = MaterialTheme.colorScheme.primary)
                         }
-                    }
+                    },
+                    actions = {
+                        IconButton(onClick = { /* Action */ }) {
+                            Icon(Icons.Default.MoreVert, contentDescription = null)
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        scrolledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+                    )
                 )
             },
+            containerColor = MaterialTheme.colorScheme.surface,
             content = content
         )
     }
+}
+
+@Composable
+fun DrawerItem(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, selected: Boolean, onClick: () -> Unit) {
+    NavigationDrawerItem(
+        icon = { Icon(icon, contentDescription = null) },
+        label = { Text(label, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal) },
+        selected = selected,
+        onClick = onClick,
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = NavigationDrawerItemDefaults.colors(
+            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+            selectedIconColor = MaterialTheme.colorScheme.primary,
+            selectedTextColor = MaterialTheme.colorScheme.primary
+        )
+    )
 }
 
 @Composable
@@ -121,19 +166,42 @@ fun DrawerHeader() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(180.dp)
-            .background(MaterialTheme.colorScheme.primaryContainer),
-        contentAlignment = Alignment.Center
+            .height(200.dp)
+            .background(
+                brush = Brush.linearGradient(
+                    colors = listOf(DeepNavy, GradientStart)
+                )
+            ),
+        contentAlignment = Alignment.BottomStart
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_safecity_logo),
-                contentDescription = null,
-                modifier = Modifier.size(80.dp)
+        Column(modifier = Modifier.padding(24.dp)) {
+            Surface(
+                modifier = Modifier.size(64.dp),
+                shape = CircleShape,
+                color = Color.White.copy(alpha = 0.2f),
+                border = androidx.compose.foundation.BorderStroke(2.dp, Color.White)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_safecity_logo),
+                        contentDescription = null,
+                        modifier = Modifier.size(45.dp)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                "SafeCity Pro",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Black,
+                color = Color.White
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("SafeCity", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
-            Text("Citizen Safety Navigator", fontSize = 12.sp, color = MaterialTheme.colorScheme.onPrimaryContainer)
+            Text(
+                "Your Safety, Our Priority",
+                fontSize = 12.sp,
+                color = Color.White.copy(alpha = 0.7f),
+                fontWeight = FontWeight.Medium
+            )
         }
     }
 }
