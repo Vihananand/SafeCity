@@ -5,6 +5,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
+    object Register : Screen("register", "Register", Icons.Default.AppRegistration)
     object Dashboard : Screen("dashboard", "Home", Icons.Default.Home)
     object Map : Screen("map", "Map", Icons.Default.Map)
     object Community : Screen("community", "Community", Icons.Default.Groups)

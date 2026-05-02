@@ -4,7 +4,6 @@ import android.widget.Toast
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,7 +17,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
@@ -33,6 +31,7 @@ import com.example.safecity.ui.theme.*
 
 @Composable
 fun DashboardScreen(
+    userName: String,
     onNavigateToSearch: () -> Unit,
     onNavigateToWalking: () -> Unit,
     onNavigateToIncident: () -> Unit
@@ -46,8 +45,7 @@ fun DashboardScreen(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        MaterialTheme.colorScheme.surface,
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                        DeepNavy,
                         MaterialTheme.colorScheme.surface
                     )
                 )
@@ -61,7 +59,7 @@ fun DashboardScreen(
             contentPadding = PaddingValues(bottom = 32.dp, top = 16.dp)
         ) {
             item {
-                HeaderSection(onNavigateToSearch)
+                HeaderSection(userName, onNavigateToSearch)
             }
 
             item {
@@ -78,6 +76,7 @@ fun DashboardScreen(
                         text = "Safety Insights",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
+                        color = Color.White,
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
                     HorizontalPager(
@@ -95,6 +94,7 @@ fun DashboardScreen(
                     text = "Emergency Quick Access",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
+                    color = Color.White,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 Row(
@@ -116,10 +116,11 @@ fun DashboardScreen(
                     Text(
                         text = "Recent Local Incidents",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
                     )
                     TextButton(onClick = onNavigateToIncident) {
-                        Text("View All", color = MaterialTheme.colorScheme.primary)
+                        Text("View All", color = InfoBlue)
                     }
                 }
             }
@@ -132,7 +133,7 @@ fun DashboardScreen(
 }
 
 @Composable
-fun HeaderSection(onNavigateToSearch: () -> Unit) {
+fun HeaderSection(userName: String, onNavigateToSearch: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -157,9 +158,10 @@ fun HeaderSection(onNavigateToSearch: () -> Unit) {
             Spacer(modifier = Modifier.width(12.dp))
             Column {
                 Text(
-                    text = "Hello, John Doe!",
+                    text = "Hello, $userName!",
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
                 )
                 Surface(
                     color = SafeGreen.copy(alpha = 0.1f),
@@ -178,10 +180,9 @@ fun HeaderSection(onNavigateToSearch: () -> Unit) {
         IconButton(
             onClick = onNavigateToSearch,
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.surface, CircleShape)
-                .shadow(2.dp, CircleShape)
+                .background(Color.White.copy(alpha = 0.1f), CircleShape)
         ) {
-            Icon(Icons.Default.Search, contentDescription = "Search", tint = MaterialTheme.colorScheme.primary)
+            Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.White)
         }
     }
 }
@@ -227,9 +228,9 @@ fun ModeSelectionSection(onNavigateToWalking: () -> Unit) {
             shape = RoundedCornerShape(16.dp),
             border = BorderStroke(2.dp, Brush.linearGradient(colors = listOf(GradientEnd, GradientStart)))
         ) {
-            Icon(Icons.Default.DirectionsBus, contentDescription = null)
+            Icon(Icons.Default.DirectionsBus, contentDescription = null, tint = Color.White)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Public Transit", fontWeight = FontWeight.Bold)
+            Text("Public Transit", fontWeight = FontWeight.Bold, color = Color.White)
         }
     }
 }
@@ -389,7 +390,7 @@ fun QuickActionItem(modifier: Modifier, title: String, icon: ImageVector, color:
             .height(110.dp)
             .shadow(2.dp, RoundedCornerShape(20.dp)),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.elevatedCardColors(containerColor = Color.White.copy(alpha = 0.05f))
     ) {
         Column(
             modifier = Modifier
@@ -416,7 +417,7 @@ fun QuickActionItem(modifier: Modifier, title: String, icon: ImageVector, color:
                 text = title,
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = Color.White,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
         }
@@ -439,7 +440,7 @@ fun ActivityListItem(index: Int, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
         shape = RoundedCornerShape(16.dp),
         onClick = onClick
     ) {
@@ -460,7 +461,7 @@ fun ActivityListItem(index: Int, onClick: () -> Unit) {
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = text, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
+                Text(text = text, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge, color = Color.White)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.AccessTime, contentDescription = null, modifier = Modifier.size(12.dp), tint = Color.Gray)
                     Spacer(modifier = Modifier.width(4.dp))
@@ -469,9 +470,9 @@ fun ActivityListItem(index: Int, onClick: () -> Unit) {
             }
             IconButton(
                 onClick = onClick,
-                modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), CircleShape)
+                modifier = Modifier.background(Color.White.copy(alpha = 0.1f), CircleShape)
             ) {
-                Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color.White)
             }
         }
     }

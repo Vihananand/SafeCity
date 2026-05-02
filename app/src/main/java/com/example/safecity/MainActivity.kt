@@ -9,17 +9,15 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.automirrored.filled.FactCheck
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -27,6 +25,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -37,6 +36,7 @@ import com.example.safecity.receiver.AlarmReceiver
 import com.example.safecity.ui.Screen
 import com.example.safecity.ui.screens.*
 import com.example.safecity.ui.theme.SafeCityTheme
+import com.example.safecity.viewmodel.UserViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -77,13 +77,15 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen(
     isDarkMode: Boolean,
-    onThemeToggle: (Boolean) -> Unit
+    onThemeToggle: (Boolean) -> Unit,
+    userViewModel: UserViewModel = viewModel()
 ) {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+    val userName by userViewModel.userName.collectAsState()
 
     LaunchedEffect(Unit) {
         delay(45000)
@@ -187,7 +189,7 @@ fun MainScreen(
             topBar = {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val route = navBackStackEntry?.destination?.route
-                if (route != Screen.WalkingMode.route) {
+                if (route != Screen.WalkingMode.route && route != Screen.Register.route) {
                     TopAppBar(
                         title = {
                             val title = route?.substringAfterLast(".")?.replaceFirstChar { it.uppercase() } ?: "SafeCity"
@@ -212,7 +214,7 @@ fun MainScreen(
             bottomBar = {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val route = navBackStackEntry?.destination?.route
-                val hidden = listOf(Screen.WalkingMode.route, Screen.Search.route, Screen.IncidentDetail.route, Screen.Profile.route, Screen.Vault.route, Screen.Training.route, Screen.Scan.route, Screen.Havens.route, Screen.SafetyPlan.route, Screen.Recorder.route)
+                val hidden = listOf(Screen.Register.route, Screen.WalkingMode.route, Screen.Search.route, Screen.IncidentDetail.route, Screen.Profile.route, Screen.Vault.route, Screen.Training.route, Screen.Scan.route, Screen.Havens.route, Screen.SafetyPlan.route, Screen.Recorder.route)
                 if (route !in hidden) {
                     NavigationBar {
                         val currentDestination = navBackStackEntry?.destination
@@ -234,20 +236,29 @@ fun MainScreen(
                 }
             }
         ) { innerPadding ->
-            NavHost(navController, Screen.Dashboard.route, Modifier.padding(innerPadding)) {
+            NavHost(navController, Screen.Register.route, Modifier.padding(innerPadding)) {
+                composable(Screen.Register.route) {
+                    RegisterScreen(onRegisterSuccess = { name ->
+                        userViewModel.setUserName(name)
+                        navController.navigate(Screen.Dashboard.route) {
+                            popUpTo(Screen.Register.route) { inclusive = true }
+                        }
+                    })
+                }
                 composable(Screen.Dashboard.route) {
                     DashboardScreen(
+                        userName = userName,
                         onNavigateToSearch = { navController.navigate(Screen.Search.route) },
                         onNavigateToWalking = { navController.navigate(Screen.WalkingMode.route) },
                         onNavigateToIncident = { navController.navigate(Screen.IncidentDetail.route) }
                     )
                 }
-                composable(Screen.Map.route) { MapScreen() }
+                composable(Screen.Map.route) { CityMapScreen(onBack = { navController.popBackStack() }) }
                 composable(Screen.Community.route) { CommunityScreen() }
                 composable(Screen.Report.route) { ReportIncidentScreen(onBack = { navController.popBackStack() }) }
                 composable(Screen.Emergency.route) { EmergencyAssistanceScreen(onBack = { navController.popBackStack() }) }
                 composable(Screen.Alerts.route) { AlertsScreen(onBack = { navController.popBackStack() }) }
-                composable(Screen.Profile.route) { ProfileScreen() }
+                composable(Screen.Profile.route) { ProfileScreen(userName = userName) }
                 composable(Screen.Settings.route) {
                     SettingsScreen(
                         isDarkMode = isDarkMode,
